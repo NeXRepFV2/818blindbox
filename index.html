@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>818启航盛典任务盲盒 · 818 Grand Launch · Task Mystery Box</title>
+  <meta name="description" content="818启航盛典任务盲盒 · 500次分段掉落 · 上报ID/奖项/抽奖时间(GMT+8)" />
+  <style>
+    :root { --overlay: rgba(170, 24, 24, .58); --overlay2: rgba(255, 92, 0, .38); }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue","Noto Sans",Arial;
+      color:#fff;
+      background: url('131645db-2ca0-42dd-881c-49c5da42181e.png') center/cover no-repeat fixed;
+      position: relative; min-height: 100vh;
+    }
+    body::before{
+      content:""; position:fixed; inset:0;
+      background:
+        radial-gradient(1200px 600px at 50% 30%, var(--overlay2), rgba(0,0,0,0) 70%),
+        linear-gradient(180deg, rgba(0,0,0,.75), rgba(0,0,0,.55) 30%, rgba(0,0,0,.75));
+      pointer-events:none; z-index:-1;
+    }
+    header{ padding: 28px 16px 12px; text-align:center; text-shadow: 0 2px 12px rgba(0,0,0,.45); }
+    h1{ margin:0; font-size: clamp(24px, 4vw, 40px); letter-spacing:.5px; font-weight:800; }
+    .subtitle{ margin-top:6px; color:#ffd7a8; font-size: clamp(12px, 2.2vw, 16px); }
+    .container{ max-width: 960px; margin: 0 auto; padding: 16px; }
+    .panel{ background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.09); border-radius: 14px; padding: 18px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .form-box input[type="text"], .form-box input[type="number"], .form-box input[type="email"]{
+      width: 260px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.15);
+      background: rgba(0,0,0,.35); color:#fff; margin:6px;
+    }
+    .form-box label{font-size:12px;color:#ffd7a8}
+    .form-box button{
+      padding: 10px 20px; font-size: 18px;
+      background: linear-gradient(135deg,#ff7a00,#ffb703); color:#1a1a1a; border:none; border-radius:10px; cursor:pointer; margin-top:10px;
+      box-shadow: 0 6px 18px rgba(255,122,0,.35);
+    }
+    .box{ width: 240px; height: 240px; margin:24px auto 0; border-radius:18px;
+      background: url('mang he.png') center/cover no-repeat; box-shadow: 0 12px 36px rgba(0,0,0,.45); animation: shake 0s; }
+    @keyframes shake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      10% { transform: translate(-8px, 6px) rotate(-5deg); }
+      20% { transform: translate(8px, -6px) rotate(5deg); }
+      30% { transform: translate(-10px, 8px) rotate(-6deg); }
+      40% { transform: translate(10px, -8px) rotate(6deg); }
+      50% { transform: translate(-6px, 6px) rotate(-4deg); }
+      60% { transform: translate(6px, -6px) rotate(4deg); }
+      70% { transform: translate(-4px, 4px) rotate(-3deg); }
+      80% { transform: translate(4px, -4px) rotate(3deg); }
+      90% { transform: translate(-2px, 2px) rotate(-2deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+    #result{
+      max-height:320px; overflow:auto; margin-top:12px;
+      display:flex; flex-direction: column; gap:6px;
+    }
+    .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+    .file-group{display:inline-flex;align-items:center;gap:6px}
+    .clear{font-size:12px;padding:2px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.2);background:rgba(0,0,0,.2);color:#fff;cursor:pointer}
+    .muted{opacity:.7;font-size:12px}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>818启航盛典任务盲盒</h1>
+    <div class="subtitle">818 Grand Launch · Task Mystery Box</div>
+  </header>
+
+  <div class="container">
+    <div class="panel">
+      <div class="form-box" style="text-align:center">
+        <div class="row">
+          <input type="text" id="userID" placeholder="请输入您的ID号 (ZMYXXXXXXXX)" />
+          <input type="email" id="email" placeholder="（可选）请输入您的邮箱地址 / Optional email" />
+          <input type="number" id="chances" placeholder="请输入抽奖次数 / Draws" min="1" value="1" />
+        </div>
+        <div class="row muted">仅上报：ID号 / 奖项 / 抽奖时间 (GMT+8) · Reporting only: ID / Prize / Time (GMT+8)</div>
+
+        <div class="row" style="margin-top:8px">
+          <div class="file-group">
+            <label>上传盲盒图片：</label>
+            <input type="file" id="boxImageInput" accept="image/*"><button class="clear" onclick="clearBoxImage()">❌</button>
+          </div>
+          <div class="file-group">
+            <label>上传背景图：</label>
+            <input type="file" id="bgImageInput" accept="image/*"><button class="clear" onclick="clearBackgroundImage()">❌</button>
+          </div>
+        </div>
+
+        <button onclick="startDraws()">开始抽奖 / Start</button>
+        <div class="box" id="box"></div>
+        <div id="result"></div>
+        <button onclick="exportToExcel()">导出抽奖数据 CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="password" id="adminPass" placeholder="请输入密码以重设奖池" style="position: fixed; bottom: 10px; right: 10px; width: 180px; padding: 5px; font-size: 12px; opacity: 0.1; z-index: 999;">
+
+<script>
+  // ===== Apps Script （仅上报三列） =====
+  const googleScriptURL = "https://script.google.com/macros/s/AKfycbzW68GNeAgwX_5Bw0kRqcG2EBX_uT6G-FPvmLEQwF9ufCuQSVWUAs4R3x6E9cZ-26GF/exec";
+
+  // ===== 500次 · 分段掉落 —— 强化 RM1000 “硬窗口” =====
+  const CONFIG = {
+    segments: [
+      {name:"S1", start:1, end:50},
+      {name:"S2", start:51, end:150},
+      {name:"S3", start:151, end:300},
+      {name:"S4", start:301, end:450},
+      {name:"S5", start:451, end:500},
+    ],
+    quotas: { G1:[1,0,1,1,1], G2:[4,5,6,6,2], G3:[10,10,12,12,4] },
+    values: { G1:1000, G2:300, G3:200, G4:100 },
+    labels: {
+      G1:"RM1000 一等奖 / First Prize",
+      G2:"RM300 二等奖 / Second Prize",
+      G3:"RM200 三等奖 / Third Prize",
+      G4:"RM100 四等奖 / Fourth Prize"
+    },
+    // 这四个窗口是“硬性”的：各出1个RM1000，且不会在其窗口外出现
+    hardG1Windows: {
+      0:[1,20],     // S1 只在 1–20 内出现 1 个
+      2:[190,230],  // S3 只在 190–230 内出现 1 个
+      3:[360,420],  // S4 只在 360–420 内出现 1 个
+      4:[460,500]   // S5 只在 460–500 内出现 1 个
+    }
+  };
+
+  // ===== 工具函数 =====
+  function seededRandom(seed){
+    return function() {
+      let t = seed += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+  }
+  function sampleWithoutReplacement(arr, k, rand=Math.random){
+    const a = arr.slice(), res = [];
+    for(let i=0;i<k && a.length>0;i++){
+      const j = Math.floor(rand()*a.length);
+      res.push(a[j]); a.splice(j,1);
+    }
+    return res;
+  }
+
+  // ===== 预采样计划（严格窗口） =====
+  function buildSchedule(seed){
+    const rand = seededRandom(seed);
+    const assignments = {}, occupied = new Set();
+
+    // 一等奖：严格在硬窗口内采样（不允许回退到段外/段内其他位置）
+    CONFIG.segments.forEach((seg, idx)=>{
+      const q = CONFIG.quotas.G1[idx]||0; if(q<=0) return;
+      const window = CONFIG.hardG1Windows[idx];
+      if(!window){ return; } // 若没定义窗口且q>0，这里可加异常处理；当前配置不会发生
+      const [hs0, he0] = window;
+      // clip to segment just in case
+      const hs = Math.max(hs0, seg.start), he = Math.min(he0, seg.end);
+      const candidates = []; for(let d=hs; d<=he; d++) candidates.push(d);
+      const picks = sampleWithoutReplacement(candidates, q, rand);
+      for(const d of picks){ assignments[d]="G1"; occupied.add(d); }
+    });
+
+    // 二/三等奖：在剩余空位内各段预采样；若不足则段内顺延
+    for(const prize of ["G2","G3"]){
+      CONFIG.segments.forEach((seg, idx)=>{
+        const q = CONFIG.quotas[prize][idx]||0; if(q<=0) return;
+        const candidates = [];
+        for(let d=seg.start; d<=seg.end; d++){ if(!occupied.has(d)) candidates.push(d); }
+        let picks = sampleWithoutReplacement(candidates, q, rand);
+        if(picks.length < q){
+          let i=seg.start; while(picks.length<q && i<=seg.end){
+            if(!occupied.has(i) && !picks.includes(i)) picks.push(i);
+            i++;
+          }
+        }
+        for(const d of picks){ assignments[d]=prize; occupied.add(d); }
+      });
+    }
+
+    // 其余全部填充为四等奖
+    for(const seg of CONFIG.segments){
+      for(let d=seg.start; d<=seg.end; d++){ if(!assignments[d]) assignments[d]="G4"; }
+    }
+    return assignments;
+  }
+
+  // ===== 状态与元素 =====
+  const box = document.getElementById("box");
+  const result = document.getElementById("result");
+  let schedule = {};
+  let globalDrawCount = 0;
+  let isShaking = false;
+  const drawRecords = [];
+
+  function initPrizePlan() {
+    schedule = buildSchedule(Math.floor(Math.random()*1e9));
+    globalDrawCount = 0;
+    result.innerHTML = "";
+  }
+  initPrizePlan();
+
+  function resetPrizePool() { initPrizePlan(); alert("奖池已重置，已重新生成500次掉落计划。"); }
+
+  function startDraws() {
+    const userID = document.getElementById("userID").value.trim();
+    const chancesVal = document.getElementById("chances").value.trim();
+    const chances = parseInt(chancesVal);
+    if (!userID || isNaN(chances) || chances < 1) {
+      alert("请输入ID号，并确保抽奖次数 ≥ 1！ / Please input ID and a valid number of draws (≥1).");
+      return;
+    }
+    runDraw(chances, userID);
+  }
+
+  function runDraw(remaining, userID) {
+    if (isShaking || remaining <= 0) return;
+    if (globalDrawCount >= 500) { alert("已到达500次上限 / Reached 500-draw limit"); return; }
+
+    isShaking = true;
+    box.style.animation = "shake 1.2s ease-in-out";
+
+    setTimeout(() => {
+      globalDrawCount++;
+      const prizeCode = schedule[globalDrawCount];
+      const prizeLabel = CONFIG.labels[prizeCode] || "RM100 四等奖 / Fourth Prize";
+
+      box.style.animation = "none";
+
+      const now = new Date();
+      const gmt8Time = new Date(now.getTime() + 8 * 60 * 60 * 1000)
+        .toISOString().replace('T', ' ').split('.')[0] + ' GMT+8';
+
+      drawRecords.push({ userID, prize: prizeLabel, time: gmt8Time });
+
+      // 上报到表格（仅三列）
+      fetch(googleScriptURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userID, prize: prizeLabel, time: gmt8Time })
+      });
+
+      // 3) 双语结果，并且 4) 最新结果放最顶（prepend）
+      const line = `🎉 <b>${userID}</b> 抽中 / won: <b>${prizeLabel}</b> <span class="muted">(${gmt8Time})</span>`;
+      const div = document.createElement('div');
+      div.innerHTML = line;
+      result.prepend(div);    // 最新在最上方
+      result.scrollTop = 0;   // 定位到顶部
+
+      isShaking = false;
+      if (remaining > 1) setTimeout(() => runDraw(remaining - 1, userID), 300);
+    }, 1200);
+  }
+
+  function exportToExcel() {
+    let csv = 'ID号,奖项,抽奖时间 (GMT+8)\n';
+    drawRecords.forEach(r => { csv += `${r.userID},${r.prize},${r.time}\n`; });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = '抽奖记录.csv';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  // 图片替换
+  document.getElementById("boxImageInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) { box.style.backgroundImage = `url(${evt.target.result})`; };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById("bgImageInput").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      document.body.style.background = `url(${evt.target.result}) center/cover no-repeat fixed`;
+    };
+    reader.readAsDataURL(file);
+  });
+  function clearBackgroundImage() {
+    document.body.style.background = "url('131645db-2ca0-42dd-881c-49c5da42181e.png') center/cover no-repeat fixed";
+  }
+  function clearBoxImage() {
+    box.style.backgroundImage = "url('mang he.png')";
+  }
+
+  // 管理重置
+  document.getElementById("adminPass").addEventListener("change", function(e) {
+    const pwd = e.target.value.trim();
+    if (pwd === "888888") {
+      resetPrizePool();
+      e.target.value = "";
+    } else {
+      alert("密码错误 / Wrong password");
+      e.target.value = "";
+    }
+  });
+</script>
+</body>
+</html>
